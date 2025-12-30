@@ -1,0 +1,88 @@
+import {useState,useEffect} from 'react'
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Table from 'react-bootstrap/Table'
+
+import Button from 'react-bootstrap/esm/Button'
+import { useNavigate } from 'react-router-dom'
+
+const Dashboard=()=>{
+const[employee,setEmployee]=useState([])
+const navigate=useNavigate();
+useEffect(()=>{
+    const fetchEmployee=async()=>{
+        try{
+        const response= await fetch("http://localhost:8080/api/employee");
+        const data= await response.json();
+        setEmployee(data);
+        }
+        catch(error){
+            console.error("error", error.message);
+        }
+
+    
+        }
+    fetchEmployee()
+},[])
+const handleDelete=async (employeeId)=>{
+    try {
+        const response=await fetch(`http://localhost:8080/api/employee/${employeeId}`,{
+        method:"delete"
+    });
+    if(response.ok){
+setEmployee((prevEmployee)=>
+    prevEmployee.filter((employee)=>employee.id !==employeeId))
+    }
+    console.log("deleted successfully");
+    } catch (error) {
+        console.error("error delete message", error.message)
+        
+    }
+}
+const handleUpdate=(employeeId)=>{
+    navigate(`/employee/${employeeId}`)
+}
+    return(
+        <>
+
+    <Container className='mt-5'>
+        <Row>
+            <Col>
+            <h1 className='text-center'>Employee</h1>
+            <Table striped bordered hover responsive>
+                <thead>
+                    <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Department</th>
+                    <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {employee.map((employee)=>{
+                        return(
+                        <tr key={employee.id}>
+                        <td> {employee.name}</td> 
+                        <td> {employee.email}</td>
+                        <td> {employee.phone}</td>
+                        <td> {employee.department}</td>
+                        <td>
+                            <Button variant="outline-secondary" onClick={()=>handleUpdate(employee.id)}>update</Button>{""}
+                        <Button Variant="outline-danger" onClick={()=>handleDelete(employee.id)}>delete</Button>
+                        </td>
+                        </tr>  
+                        );
+                    })}
+                                            
+                </tbody>
+            </Table>
+            </Col>
+        </Row>
+    </Container>
+
+</>
+    )
+}
+export default Dashboard;
